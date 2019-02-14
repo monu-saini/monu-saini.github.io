@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./gifshot.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0px;
+        }
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100%;
+            opacity: 0.5;
+        }
+        .container {
+            width: 100%;
+            height: 100vh; 
+            position: relative;
+        }
+        .love-video {
+            width: 100%;
+            height: 100vh;
+        }
+        .capture-button{
+            position: absolute;
+            top: 5px;
+            padding: 5px;
+            right: 20px;
+            border-radius: 5px;
+            color: white;
+            background: #f64136;
+            z-index: 99;
+            cursor: pointer;
+        }
+        .capture-button span { 
+            margin-right: '10px' 
+        } 
+        .lds-ripple {
+            display: inline-block;
+            position: relative;
+            width: 64px;
+            height: 64px;
+        }
+        .lds-ripple div {
+            position: absolute;
+            border: 4px solid #f64136;
+            opacity: 1;
+            border-radius: 50%;
+            animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+        .lds-ripple div:nth-child(2) {
+            animation-delay: -0.5s;
+        }
+        @keyframes lds-ripple {
+        0% {
+            top: 28px;
+            left: 28px;
+            width: 0;
+            height: 0;
+            opacity: 1;
+        }
+        100% {
+            top: -1px;
+            left: -1px;
+            width: 58px;
+            height: 58px;
+            opacity: 0;
+        }
+        }
+
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="live-video-container" >
+        <button type=button onClick="take_snapshot()" class="capture-button">
+            <span>❤</span>
+            Take Snapshot 
+        </button>
+        <video autoplay id="live-video" class="love-video "></video>
+        <video autoplay id="live-video-hidden" class="love-video" style="display: none"></video>
+        <div id="loading" style="display:none">
+                <div class="lds-ripple"><div></div><div></div></div>
+        </div>
+    </div>    
+    <div id="results" class="container" style="display:none">
+        <!-- <img src="./download.gif" class="image-overlay"> -->
+        <video  autoplay loop="loop" muted="false" id="love-credit-video" class="love-video ">
+                <source src="./SampleVideo.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+    </div>   
+<script>
+    
+</script> 
+<!-- Configure a few settings and attach camera -->
+<script language="JavaScript">
+    $( document ).ready(function() {
+        const constraints = {
+      video: true
+    };
+    
+    const video = document.getElementById('live-video'),
+            video2 = document.getElementById('live-video-hidden');
+    
+    const getUserMedia = function () {
+        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+        return getUserMedia ? getUserMedia.bind(navigator) : getUserMedia;
+    }();
+    
+    if(getUserMedia && typeof getUserMedia === 'function') {
+        getUserMedia(constraints, function (stream) {
+                video.srcObject = stream;
+                video2.srcObject = stream;
+            }, function (stream) {
+                alert('There was an issue with the getUserMedia API - the user probably denied permission');
+                $('.capture-button').hide()
+            })
+    } else {
+        alert('The getUserMedia API is not supported in your browser');
+        $('.capture-button').hide()
+    }
+    // navigator.mediaDevices.getUserMedia(constraints).
+        // then((stream) => {
+        //     video.srcObject = stream;
+        //     video2.srcObject = stream;
+        // });
+
+
+    });
+    function take_snapshot() {
+        $('#loading').show();
+        gifshot.createGIF({
+            gifWidth: window.innerWidth,//Number(gifWidth.value),
+            gifHeight: window.innerHeight,//Number(gifHeight.value),
+            images: false, //gifSource.value === 'images' ? ['http://i.imgur.com/2OO33vX.png', 'http://i.imgur.com/qOwVaSN.png', 'http://i.imgur.com/Vo5mFZJ.gif'] : false,
+            video:  document.getElementById('live-video-hidden'), //false,//gifSource.value === 'video' ? ['example.mp4', 'example.ogv'] : false,
+            // filter: filter.value,
+            interval: .1,// Number(interval.value),
+            numFrames: 10, //Number(numFrames.value),
+            frameDuration: 1,//Number(frameDuration.value),
+            text: '', //text.value,
+            fontWeight: 'normal', // fontWeight.value,
+            fontSize: '16px', //ontSize.value + 'px',
+            fontFamily: 'sans-serif' ,//fontFamily.value,
+            fontColor:  '#FFFFFF', // fontColor.value,
+            textAlign: 'center', // textAlign.value,
+            textBaseline: 'bottom', //textBaseline.value,
+            sampleInterval: 10, // Number(sampleInterval.value),
+            numWorkers: 2// Number(numWorkers.value)
+            
+        }, function(obj) {
+            if (!obj.error) { 
+                console.log(obj.image)
+                var animatedImage = document.createElement('img');
+                animatedImage.src = obj.image;
+                animatedImage.className = "image-overlay"
+                $('#live-video-container').hide();
+                let results = $('#results');
+                results.show();
+                results.append(animatedImage);
+                $('#loading').hide();
+            } else {
+                console.log('obj.error', obj.error);
+                console.log('obj.errorCode', obj.errorCode);
+                console.log('obj.errorMsg', obj.errorMsg);
+            }
+        });
+    }
+    
+</script>
+ 
+</body>
+</html>
